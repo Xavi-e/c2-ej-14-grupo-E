@@ -31,3 +31,33 @@ const coordenadas = {
         longitud: 0,
     },
 };
+//Capturado en una constante el formulario de las direcciones
+const formCoordenadas = document.querySelector(".form-coordenadas");
+//Capturamos los radio button de origen
+const elementoDeMiUbicacion = formCoordenadas.querySelector("#de-mi-ubicacion");
+const elementoDeDireccion = formCoordenadas.querySelector("#de-direccion");
+//Capturamos los radio button de destino(mi ubicacion y direccion)
+const elementoAMiUbicacion = formCoordenadas.querySelector("#a-mi-ubicacion");
+const elementoADireccion = formCoordenadas.querySelector("#a-direccion");
+//Si el usuario elige "Introducir dirección", debe aparecer el input debajo, para que introduzca una dirección.
+elementoADireccion.addEventListener("change", () => {
+    formCoordenadas
+        .querySelector(".a-direccion-definitiva")
+        .classList.remove("direccion-definitiva");
+});
+elementoDeDireccion.addEventListener("change", () => {
+    formCoordenadas
+        .querySelector(".de-direccion-definitiva")
+        .classList.remove("direccion-definitiva");
+});
+//Si el usuario decide poner su ubicación, el input desaparece
+elementoAMiUbicacion.addEventListener("change", () => {
+    formCoordenadas
+        .querySelector(".a-direccion-definitiva")
+        .classList.add("direccion-definitiva");
+});
+elementoDeMiUbicacion.addEventListener("change", () => {
+    formCoordenadas
+        .querySelector(".de-direccion-definitiva")
+        .classList.add("direccion-definitiva");
+});
