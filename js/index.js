@@ -68,17 +68,6 @@ const nombreDeDireccion = formCoordenadas.querySelector(
 const nombreADireccion = formCoordenadas.querySelector(
     ".nombre-lugar-a-direccion"
 );
-//Función para preparar el envia a la API de Mapbox
-const prepararEnvio = () => {
-    // Cambiar contenido por enviar coordenadas de verdad
-    nombreDeDireccion.textContent = deDireccionDefinitiva.value;
-    nombreADireccion.textContent = aDireccionDefinitiva.value;
-    //Mandamos el fetch de direccion de origen a la API de Mapbox
-    asignarCoordenadas(
-        nombreDeDireccion.textContent,
-        nombreADireccion.textContent
-    );
-};
 const deDireccionDefinitiva = formCoordenadas.querySelector(
     ".de-direccion-definitiva"
 );
@@ -91,9 +80,15 @@ deDireccionDefinitiva.addEventListener("input", () => {
     if (timer) {
         clearTimeout(timer);
         timer = 0;
-        timer = setTimeout(prepararEnvio, 500);
+        timer = setTimeout(() => {
+            datosOrigenMapbox(deDireccionDefinitiva.value);
+            datosDestinoMapbox(aDireccionDefinitiva.value);
+        }, 500);
     } else {
-        timer = setTimeout(prepararEnvio, 500);
+        timer = setTimeout(() => {
+            datosOrigenMapbox(deDireccionDefinitiva.value);
+            datosDestinoMapbox(aDireccionDefinitiva.value);
+        }, 500);
     }
 });
 let timerB = 0;
@@ -101,28 +96,74 @@ aDireccionDefinitiva.addEventListener("input", () => {
     if (timerB) {
         clearTimeout(timerB);
         timerB = 0;
-        timerB = setTimeout(prepararEnvio, 500);
+        timerB = setTimeout(() => {
+            datosOrigenMapbox(deDireccionDefinitiva.value);
+            datosDestinoMapbox(aDireccionDefinitiva.value);
+        }, 500);
     } else {
-        timerB = setTimeout(prepararEnvio, 500);
+        timerB = setTimeout(() => {
+            datosOrigenMapbox(deDireccionDefinitiva.value);
+            datosDestinoMapbox(aDireccionDefinitiva.value);
+        }, 500);
     }
 });
-const asignarCoordenadas = (direccionOrigen, direccionDestino) => {
+/*
+Función para obtener los datos de origen de la API de Mapbox y llamar a la funcion asignarCoordenadasOrigen
+para asignar las coordenadas a nuestra constante de coordenadas y llamar a la función de pintarDireccionOrigen
+para que salga la direccion devuelta de mapbox en nuestro Html.
+*/
+const datosOrigenMapbox = (direccionOrigen) => {
     fetch(`${geocodingApi}${direccionOrigen}.json?access_token=${mapboxToken}`)
         .then((response) => response.json())
-        .then(({ features }) => {
-            const {
-                geometry: { coordinates },
-            } = features[0];
-            coordenadas.desde.latitud = coordinates[1];
-            coordenadas.desde.longitud = coordinates[0];
+        .then((datos) => {
+            if (datos.message !== "Not Found") {
+                asignarCoordenadasOrigen(datos);
+                pintarDireccionOrigen(datos);
+            }
         });
+};
+/*
+Función para obtener los datos de destino de la API de Mapbox y llamar a la funcion asignarCoordenadasDestino
+para asignar las coordenadas a nuestra constante de coordenadas y llamar a la función de pintarDireccionDestino
+para que salga la direccion devuelta de mapbox en nuestro Html.
+ */
+const datosDestinoMapbox = (direccionDestino) => {
     fetch(`${geocodingApi}${direccionDestino}.json?access_token=${mapboxToken}`)
         .then((response) => response.json())
-        .then(({ features }) => {
-            const {
-                geometry: { coordinates },
-            } = features[0];
-            coordenadas.hasta.latitud = coordinates[1];
-            coordenadas.hasta.longitud = coordinates[0];
+        .then((datos) => {
+            if (datos.message !== "Not Found") {
+                asignarCoordenadasDestino(datos);
+                pintarDireccionDestino(datos);
+            }
         });
+};
+//Función para asignar las coordenadas de origen a nuestra constante de coordenadas.
+const asignarCoordenadasOrigen = (datosOrigen) => {
+    const { features } = datosOrigen;
+    const {
+        geometry: { coordinates },
+    } = features[0];
+    coordenadas.desde.latitud = coordinates[1];
+    coordenadas.desde.longitud = coordinates[0];
+};
+//Función para asignar las coordenadas de destino a nuestra constante de coordenadas.
+const asignarCoordenadasDestino = (datosDestino) => {
+    const { features } = datosDestino;
+    const {
+        geometry: { coordinates },
+    } = features[0];
+    coordenadas.hasta.latitud = coordinates[1];
+    coordenadas.hasta.longitud = coordinates[0];
+};
+//Funcion para pintar en el HTML las direcciones de origen
+const pintarDireccionOrigen = (datosOrigen) => {
+    const { features } = datosOrigen;
+    const { place_name: nombreDireccion } = features[0];
+    nombreDeDireccion.textContent = nombreDireccion;
+};
+//Funcion para pintar en el HTML las direcciones de destino
+const pintarDireccionDestino = (datosDestino) => {
+    const { features } = datosDestino;
+    const { place_name: nombreDireccion } = features[0];
+    nombreADireccion.textContent = nombreDireccion;
 };
