@@ -1,4 +1,4 @@
-/* global mapboxgl */
+/* global mapboxgl luxon */
 
 // Datos para las APIs
 const geocodingApi = "https://api.mapbox.com/geocoding/v5/mapbox.places/";
@@ -111,6 +111,12 @@ aDireccionDefinitiva.addEventListener("input", () => {
     timerB = setTimeout(prepararEnvio, 500);
   }
 });
+
+let coordenadasDesdeLatitud = coordenadas.desde.latitud;
+let coordenadasDesdeLongitud = coordenadas.desde.longitud;
+let coordenadasHastaLatitud = coordenadas.hasta.latitud;
+let coordenadasHastaLongitud = coordenadas.hasta.longitud;
+
 const asignarCoordenadas = (direccionOrigen, direccionDestino) => {
   fetch(`${geocodingApi}${direccionOrigen}.json?access_token=${mapboxToken}`)
     .then((response) => response.json())
@@ -118,8 +124,8 @@ const asignarCoordenadas = (direccionOrigen, direccionDestino) => {
       const {
         geometry: { coordinates },
       } = features[0];
-      coordenadas.desde.latitud = coordinates[1];
-      coordenadas.desde.longitud = coordinates[0];
+      coordenadasDesdeLatitud = coordinates[1];
+      coordenadasDesdeLongitud = coordinates[0];
       nombreDeDireccion.textContent = features[0].place_name;
     });
   fetch(`${geocodingApi}${direccionDestino}.json?access_token=${mapboxToken}`)
@@ -128,8 +134,48 @@ const asignarCoordenadas = (direccionOrigen, direccionDestino) => {
       const {
         geometry: { coordinates },
       } = features[0];
-      coordenadas.hasta.latitud = coordinates[1];
-      coordenadas.hasta.longitud = coordinates[0];
+      coordenadasHastaLatitud = coordinates[1];
+      coordenadasHastaLongitud = coordinates[0];
       nombreADireccion.textContent = features[0].place_name;
     });
 };
+
+const btnEnviarCoords = formCoordenadas.querySelector(".btn-enviar-coords");
+// NO HARCODEAR, CAMBIAR LINEAS DE ABAJO
+
+const fechaDeHoy = luxon.DateTime.now();
+const fechaDeHoyOrdenada = `${fechaDeHoy.month}/${fechaDeHoy.day}/${fechaDeHoy.year}`;
+
+// Hora actual no correcta, devuelve 21:7 si son las 21:07, ademas la api de TMB requiere un am o pm detras.
+
+const getMinutoActual = (fechaDeHoy) => {
+  let minuto = fechaDeHoy.minute;
+  if (minuto < 10) {
+    minuto = `0${minuto}`;
+  }
+  return minuto;
+};
+
+const getHoraActual = (fechaDeHoy) => {
+  let hora = fechaDeHoy.hour;
+  let pmAm;
+  if (hora > 12) {
+    hora = `${hora % 12}`;
+    pmAm = "pm";
+  } else {
+    pmAm = "am";
+  }
+  return `${hora}:${getMinutoActual(fechaDeHoy)}${pmAm}`;
+};
+const horaActual = `${getHoraActual(fechaDeHoy)}`;
+
+btnEnviarCoords.addEventListener("click", (e) => {
+  e.preventDefault();
+  fetch(
+    `${tmbApi}?app_id=${appId}&app_key=${appKey}&fromPlace=${coordenadasDesdeLatitud},${coordenadasDesdeLongitud}&toPlace=${coordenadasHastaLatitud},${coordenadasHastaLongitud}&date=${fechaDeHoyOrdenada}&${horaActual}&arriveBy=true&mode=TRANSIT,WALK`
+  )
+    .then((response) => response.json())
+    .then((response) => {
+      console.log(response.plan);
+    });
+});
