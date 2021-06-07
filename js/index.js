@@ -209,33 +209,3 @@ btnEnviarCoords.addEventListener("click", (e) => {
             console.log(response.plan.itineraries);
         });
 });
-
-   const pasos = plan.itineraries[0].legs;
-   const iniciarRuta = () => {
-     vaciarPasos();
-
-     let i = 1;
-     for (const paso of listadoPasos) {
-       const {
-         distance,
-         duration,
-         startTime,
-         from: { name: desde, lon, lat },
-         to: { name: hasta },
-       } = paso;
-
-
-       const nuevoPaso = document.querySelector(".paso-dummy").cloneNode(true);
-       nuevoPaso.classList.remove("paso-dummy");
-       nuevoPaso.classList.add("nuevo-paso");
-
-
-       const mapa = nuevoPaso.querySelector(".mapa");
-
-     const generaMapa = (coordenadas, mapa) => {
-       const mapbox = new mapboxgl.Map({
-       container: mapa,
-       style: "mapbox://styles/mapbox/streets-v11",
-       center: coordenadas,
-       zoom: 14,
-   });
